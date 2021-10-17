@@ -1,0 +1,33 @@
+{
+  "name": "nodetwitch",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js",
+    "docs": "jsdoc -c jsdoc.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jp0617/nodetwitch.git"
+  },
+  "author": "Juan Pablo Ramirez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jp0617/nodetwitch/issues"
+  },
+  "homepage": "https://github.com/jp0617/nodetwitch#readme",
+  "dependencies": {
+    "axios": "^0.23.0",
+    "celebrate": "^15.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsdoc": "^3.6.7",
+    "mongoose": "^6.0.11",
+    "mysql2": "^2.3.0",
+    "nodemon": "^2.0.13",
+    "sequelize": "^6.7.0"
+  }
+}

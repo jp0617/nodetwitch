@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: users.controller.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: users.controller.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const axios = require("axios");
+const vacacionService = require("../services/vacacion.services");
+const logService = require("../services/log.services");
+
+/**
+ * getuser: This function get user &lt;br/>
+ * Route: /users &lt;br/>
+ * method: get
+ *
+ * @example
+ * query
+ * "user":"string"
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
+exports.getusers = (req, res) => {
+  axios
+    .get("https://api.twitch.tv/helix/users", {
+      params: {
+        login: req.query.user,
+      },
+      headers: {
+        Authorization: process.env.auth_get,
+        "Client-ID": process.env.client_id,
+      },
+    })
+    .then(function (response) {
+      res.status(200).json(response.data.data[0]);
+      logService.create({
+        who: process.env.client_id,
+        log: "consulta user " + req.query.user,
+      });
+    })
+    .catch(function (error) {
+      res.status(500).json(error);
+    });
+};
+
+/**
+ * postcommercial: This function create a commercial &lt;br/>
+ * Route: /users &lt;br/>
+ * method: post
+ *
+ * @example
+ *
+ *
+ * body
+ *
+ * {
+ *  id_canal:string
+ *  duracion:integer
+ * }
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
+exports.postcommercial = (req, res) => {
+  const broadcaster_id = req.body.id_canal;
+  const length = req.body.duracion;
+
+  var data = JSON.stringify({
+    broadcaster_id: broadcaster_id,
+    length: length,
+  });
+
+  var config = {
+    method: "post",
+    url: "https://api.twitch.tv/helix/channels/commercial",
+    headers: {
+      Authorization: process.env.auth_post,
+      "Client-Id": process.env.client_id,
+      "Content-Type": "application/json",
+    },
+    data: data,
+  };
+
+  axios(config)
+    .then(function (response) {
+      res.status(200).json(response.data.data);
+      logService.create({
+        who: process.env.client_id,
+        log: ("create commercial " + broadcaster_id, length),
+      });
+    })
+    .catch(function (error) {
+      res.status(500).json({ message: "the user is current offline" });
+    });
+};
+
+/**
+ * updateschedulevacations: This function update vacation mode &lt;br/>
+ * Route: /users &lt;br/>
+ * method: patch
+ *
+ * @example
+ *
+ *
+ * body
+ *
+ * {
+ *  id_canal:string
+ *  vacacion: boolean
+ *  inicio_vacaciones: timezone
+ *  fin_vacaciones: timezone
+ *  zonahoraria: string zona horaria
+ * }
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+exports.updateschedulevacations = (req, res) => {
+  const id_channel = req.body.id_canal;
+  const vacation_enabled = req.body.vacaciones;
+  const inicio_vacaciones = req.body.inicio_vacaciones;
+  const fin_vacaciones = req.body.fin_vacaciones;
+  const zonahoraria = req.body.zonahoraria;
+
+  var config = {
+    method: "patch",
+    url: `https://api.twitch.tv/helix/schedule/settings?broadcaster_id=${id_channel}&amp;is_vacation_enabled=${vacation_enabled}&amp;vacation_start_time=${inicio_vacaciones}&amp;vacation_end_time=${fin_vacaciones}&amp;timezone=${zonahoraria}`,
+    headers: {
+      Authorization: process.env.auth_patch,
+      "Client-Id": process.env.client_id,
+    },
+  };
+
+  axios(config)
+    .then(function (response) {
+      vacacionService.create(req.body);
+      logService.create({
+        who: process.env.client_id,
+        log: "update vacations " + id_channel,
+        vacation_enabled,
+        inicio_vacaciones,
+        fin_vacaciones,
+        zonahoraria,
+      });
+      res.status(200).json({ message: "updated successfully" });
+    })
+    .catch(function (error) {
+      res.status(500).json(error);
+    });
+};
+
+/**
+ * deletevideo: This function delete videos  &lt;br/>
+ * Route: /users &lt;br/>
+ * method: delete
+ *
+ * @example
+ *
+ *params
+ * idvideo:integer
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+exports.deletevideo = (req, res) => {
+  const idvideo = req.query.id;
+  var config = {
+    method: "delete",
+    url: `https://api.twitch.tv/helix/videos?id=${idvideo}`,
+    headers: {
+      Authorization: process.env.auth_delete,
+      "Client-Id": process.env.client_id,
+    },
+  };
+
+  axios(config)
+    .then(function (response) {
+      res.status(200).json(response.data.data);
+      logService.create({
+        who: process.env.client_id,
+        log: "delete video " + idvideo,
+      });
+    })
+    .catch(function (error) {
+      res.status(500).json(error);
+    });
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#deletevideo">deletevideo</a></li><li><a href="global.html#getgames">getgames</a></li><li><a href="global.html#getusers">getusers</a></li><li><a href="global.html#postcommercial">postcommercial</a></li><li><a href="global.html#updateschedulevacations">updateschedulevacations</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sat Oct 16 2021 22:13:38 GMT-0500 (hora estándar de Colombia)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
